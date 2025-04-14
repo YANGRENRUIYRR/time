@@ -1,0 +1,243 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>报时器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/font.css" rel="stylesheet">
+    <link href="/static/all.min.css" rel="stylesheet">
+    <link href="/static/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e6f7ff; /* 浅蓝色 */
+            --card-bg: #ffffff; /* 白色卡片 */
+            --text-color: #333333;
+            --header-bg: #007BFF;
+            --button-bg: #007BFF;
+            --button-text: #ffffff;
+            --link-color: #007BFF;
+            --box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #102a43; /* 深蓝色 */
+            --card-bg: #1f2933; /* 深灰色卡片 */
+            --text-color: #e0e0e0;
+            --header-bg: #334e68;
+            --button-bg: #4e92df;
+            --button-text: #ffffff;
+            --link-color: #4e92df;
+            --box-shadow: rgba(255, 255, 255, 0.1) 0px 4px 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            color: var(--link-color);
+        }
+
+        .url-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .url-section h2 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: var(--text-color);
+        }
+
+        .url-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .url-box input {
+            font-family: Consolas, monospace;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            flex: 1;
+            font-size: 1em;
+            padding-right: 10px;
+        }
+
+        .url-box input:focus {
+            outline: none;
+        }
+
+        .copy-button {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .copy-button:hover {
+            background-color: darken(var(--button-bg), 10%);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- 主题切换按钮 -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换夜间模式">
+            <i id="theme-icon" class="fas fa-sun"></i>
+        </button>
+
+        <!-- 页眉 -->
+        <header>
+            <h1>&nbsp;</h1>
+            <h1>报时器</h1>
+        </header>
+
+        <!-- 主体内容 -->
+        <div class="url-section">
+            <div class="url-box">
+                <input type="text" id="t" readonly>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/sweetalert2.js" type="7bbc969755a1a1e263d486d9-text/javascript"></script>
+    <script type="7bbc969755a1a1e263d486d9-text/javascript">
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+
+        // 设置当前主题
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        // 切换主题
+        themeToggleBtn.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            theme = theme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeIcon(theme);
+        });
+
+        // 更新图标
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // 复制URL功能
+        function copyURL() {
+            const urlInput = document.getElementById('current-url');
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '复制成功',
+                        text: '网址已复制到剪贴板！',
+                        timer: 700,
+                        showConfirmButton: false,
+                        heightAuto: false // 防止页面重新布局
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '复制失败',
+                        text: '请手动复制网址！',
+                        timer: 700,
+                        showConfirmButton: false,
+                        heightAuto: false
+                    });
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '复制失败',
+                    text: '复制功能不支持，请手动复制。',
+                    timer: 700,
+                    showConfirmButton: false,
+                    heightAuto: false
+                });
+            }
+        }
+    </script>
+    <script>
+        function upd(){
+        var element=document.getElementById("t");
+        element.readOnly=false;
+        element.value=Date();
+        element.readOnly=true;
+      }
+      setInterval(upd,1);
+    </script>
+<script src="./cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="7bbc969755a1a1e263d486d9-|49" defer></script><script defer src="/static/beacon.min.js" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"8f4f08b9add2d779","version":"2024.10.5","r":1,"token":"43a4609bc30c445b94c6fe30085439f7","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}}}' crossorigin="anonymous"></script>
+</body>
+</html>
